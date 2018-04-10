@@ -8,9 +8,9 @@ inicio:
    mov esp,eax             ; en la direccion pedida en clase,
                            ; 0xF000:0xFFFF (ss:sp), hay un problema
                            ; con el memcopy que copia en 0x000F (parte
-                           ; alta, por lo que se modifico para que no
+                           ; alta), por lo que se modifico para que no
                            ; ocurra dicho problema 
-	push dword 0xFFFF	      ; lo que ocupa (64k)
+	push dword 0x10000      ; lo que ocupa (64k)
 	push dword 0x0000	      ; direccion origen
 	push dword 0x00000	   ; direccion destino (primer caso)
 ;	push dword 0xf0000	   ; direccion destino (segundo caso)
@@ -47,7 +47,8 @@ td3_memcopy:
 ;   rep movsb              ; copia hasta 65535
    mov ecx, [ebp+16]       ; ecx se carga con el tercer argumento
 ;   inc ecx
-   repnz movsb		         ; repnz: REPeat Not Zero.
+   a32 repnz movsb		   ; a32: para que me deje 64k en vez de 64k-1
+                           ; repnz: REPeat Not Zero.
                            ; movsb:
                            ;       [es:edi] <- [ds:esi]
                            ;       edi++, esi++ (si direction flag esta en 0)
