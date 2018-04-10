@@ -2,9 +2,7 @@
 
 use16
 inicio:
-	mov eax,0xf000
-	mov ds,eax
-	push dword 0x26		; lo que ocupa td3_memcopy (num bytes)
+	push dword 0x32		; lo que ocupa td3_memcopy
 	push dword td3_memcopy	; direccion origen
 ;	push dword 0x00000	; direccion destino (primer caso)
 	push dword 0xf0000	; direccion destino (segundo caso)
@@ -18,11 +16,12 @@ loop:
 	jmp dword loop		; para que haga un loop infinito
 
 td3_memcopy:
-; pusheo los registros que voy a utilizar, y limpio los flags de interrupcion y direccion
+; pusheo los registros que voy a utilizar, y limpio el flag direccion
 
 	push ebp		; al entrar en la funcion guardo ebp
 	mov ebp, esp		; y lo apunto a la pila
 
+	push eax
         push ecx
         push edi
         push esi
@@ -30,7 +29,10 @@ td3_memcopy:
 
 
 ; realizo la copia
-
+	mov eax,0xf000
+	mov ds,eax		; como cs:ip cuenta con los 3 MSB en F, para indicar que
+				; quiero copiar desde la direccion 0xFFFFXXXX, debo primero
+				; hacer que DS = 0xF000, cosa de que 0xF000*0x10+XXXX = FXXXX
 	mov edi, [ebp+8]	; edi contiene la direccion del primer argumento
         mov esi, [ebp+12]	; esi contiene la del segundo argumento
         mov ecx, [ebp+16]	; ecx se carga con el tercer argumento
@@ -44,6 +46,7 @@ td3_memcopy:
         pop esi
         pop edi
         pop ecx
+	pop eax
 	pop ebp
 	ret
 
